@@ -1,4 +1,5 @@
 import {Race} from "./card.data";
+import {Board} from "../board/board.model";
 
 export enum CardType {
     ELF,
@@ -35,16 +36,17 @@ class AttackValue {
     }
 }
 
-export class Card {
+export class CardModel {
     public melee: AttackValue;
     public ranged: AttackValue;
     public magic: AttackValue;
 
     constructor(
+        public id: string,
         public race: Race,
         public readonly level: number,
         public readonly name: string,
-        public readonly rawArray: number[][],
+        public readonly board: Board,
         public readonly baseMelee: number | null = 0,
         public readonly baseRanged: number | null = 0,
         public readonly baseMagic: number | null = 0,
@@ -52,12 +54,36 @@ export class Card {
         public readonly allowRotate: boolean = true,
         public readonly description: string = '',
         public readonly specialAction?: any,
-        public readonly actionTarget?: Card) {
-        if (rawArray.length !== rawArray[0].length) {
+        public readonly actionTarget?: CardModel) {
+        if (board.raw.length !== board.raw[0].length) {
             console.error(name + ': THE ARRAY SHOULD BE A SQUARE')
         }
         this.melee = new AttackValue(baseMelee);
         this.ranged = new AttackValue(baseRanged);
         this.magic = new AttackValue(baseMagic);
+    }
+
+    public getBaseMelee(): string {
+        if (this.baseMelee === null) {
+            return '-';
+        } else {
+            return '' + this.baseMelee;
+        }
+    }
+
+    public getBaseRanged(): string {
+        if (this.baseRanged === null) {
+            return '-';
+        } else {
+            return '' + this.baseRanged;
+        }
+    }
+
+    public getBaseMagic(): string {
+        if (this.baseMagic === null) {
+            return '-';
+        } else {
+            return '' + this.baseMagic;
+        }
     }
 }

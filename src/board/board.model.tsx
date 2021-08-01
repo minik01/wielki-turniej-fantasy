@@ -1,5 +1,4 @@
-import {Card} from "../card/card.model";
-import {cards} from "../card/card.data";
+import {CardModel} from "../card/card.model";
 
 export enum Rotation {
     N, E, S, W
@@ -8,7 +7,7 @@ export enum Rotation {
 export class CardOnBoard {
     constructor(public x: number,
                 public y: number,
-                public readonly card: Card,
+                public readonly card: CardModel,
                 public rot: Rotation,
     ) {
     }
@@ -24,28 +23,47 @@ export class Board {
         this.type = raw.length === 5 ? 'small' : 'big';
     }
 
-    isValid(): boolean {
-        return false;
+    getInvalidCardIds(): string[] {
+        return this.cards
+            .filter(card => !this.isValid(card))
+            .map(cardOnBoard => cardOnBoard.card.id);
     }
 
     drawCard(colIndex: number, rowIndex: number) {
         const card = this.cards.find(c => (
             c.x <= colIndex &&
-            colIndex < c.x + c.card.rawArray[0].length &&
+            colIndex < c.x + c.card.board.raw[0].length &&
             c.y <= rowIndex &&
-            rowIndex < c.y + c.card.rawArray.length
+            rowIndex < c.y + c.card.board.raw.length
         ))
         if (card) {
             //rot + empty spaces
 
             const colOffset = colIndex - card.x;
             const rowOffset = rowIndex - card.y;
-            if (card.card.rawArray[rowOffset][colOffset])
+            if (card.card.board.raw[rowOffset][colOffset])
                 return <div style={{backgroundColor: card.card.race, width: '100%', height: '100%'}}>
                 </div>
             else <></>
 
         } else
             <></>
+    }
+
+    public isValid(card: CardOnBoard): boolean {
+        const cardBoard = card.card.board.raw;
+        let cardSize = cardBoard.length;
+        for (let y = 0; y < cardSize; y++) {
+            for (let x = 0; x < cardSize; x++) {
+                if (cardBoard[y][x] === 1 &&
+                    (
+                        this.raw[(card.y + y)] === undefined ||
+                        this.raw[(card.y + y)][(card.x + x)] === undefined ||
+                        this.raw[card.y + y][card.x + x] === -2
+                    )
+                ) return false;
+            }
+        }
+        return true;
     }
 }
